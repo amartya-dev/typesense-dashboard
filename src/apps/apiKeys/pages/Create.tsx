@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Checkbox,
+  Container,
   FormControl,
   FormControlLabel,
   InputLabel,
@@ -10,6 +11,9 @@ import {
 } from "@mui/material";
 import { AuthUtils } from "apps/auth/utils";
 import { getTypeSenseClient } from "apps/common/utils/typesense";
+import { LoadingButton } from "@mui/lab";
+import { APIKeyViewModal } from "../components/ApiKeyView";
+import { KeyCreateSchema } from "typesense/lib/Typesense/Key";
 
 const actionPermissions: { [key: string]: string[] } = {
   collections: ["create", "delete", "get", "list", "*"],
@@ -43,6 +47,39 @@ export const CreateApiKey = () => {
   const [availableCollections, setAvailableCollections] = useState<string[]>(
     []
   );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [apiKey, setApiKey] = useState<string>();
+  const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
+  const saveKey = async () => {
+    setLoading(true);
+    let createParams: KeyCreateSchema;
+    if (keyType === "admin") {
+      createParams = {
+        description: "Admin Key.",
+        actions: ["*"],
+        collections: ["*"],
+      };
+    } else if (keyType === "search") {
+      createParams = {
+        description: "Search Key",
+        actions: ["documents:search"],
+        collections:
+          selectedCollections.length >= 0 ? selectedCollections : ["*"],
+      };
+    } else {
+      createParams = {
+        description: "Custom fine grained key",
+        actions: selectedActionPermissions,
+        collections:
+          selectedCollections.length >= 0 ? selectedCollections : ["*"],
+      };
+    }
+    const client = getTypeSenseClient(AuthUtils.getAuthDetails());
+    const response = await client.keys().create(createParams);
+    setApiKey(response.value);
+    setLoading(false);
+  };
 
   const getAllCollections = async () => {
     const client = getTypeSenseClient(AuthUtils.getAuthDetails());
@@ -55,11 +92,16 @@ export const CreateApiKey = () => {
   }, []);
 
   return (
-    <>
-      <Typography variant="h3" component="h1">
+    <Container>
+      <APIKeyViewModal
+        open={dialogOpen}
+        setOpen={setDialogOpen}
+        apiKey={apiKey || ""}
+      />
+      <Typography variant="h3" display="flex" flex={1} component="h1">
         Add an API Key
       </Typography>
-      <FormControl sx={{ width: "40%", mt: 4, mb: 4 }}>
+      <FormControl fullWidth sx={{ mb: 2, mt: 4 }}>
         <InputLabel id="key-type-label">Key Type</InputLabel>
         <Select
           labelId="key-type-label"
@@ -153,6 +195,9 @@ export const CreateApiKey = () => {
             </React.Fragment>
           );
         })}
-    </>
+      <LoadingButton loading={loading} onClick={saveKey} variant="contained">
+        Add Key
+      </LoadingButton>
+    </Container>
   );
 };

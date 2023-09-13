@@ -9,6 +9,7 @@ import { DocumentsList } from "apps/index/pages/DocumentsList";
 import { AnalyticsRules } from "apps/analytics/pages/Rules";
 import { Reports } from "apps/analytics/pages/Reports";
 import { CreateApiKey } from "apps/apiKeys/pages/Create";
+import { ApiKeysList } from "apps/apiKeys/pages/List";
 
 export const Routes = () => {
   return useRoutes([
@@ -44,7 +45,10 @@ export const Routes = () => {
           <DashboardLayout />
         </RequireAuth>
       ),
-      children: [{ path: "add", element: <CreateApiKey /> }],
+      children: [
+        { path: "list", element: <ApiKeysList /> },
+        { path: "add", element: <CreateApiKey /> },
+      ],
     },
     {
       path: "/",

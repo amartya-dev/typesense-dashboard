@@ -42,12 +42,17 @@ export const SidebarConfig: SidebarItemProps[] = [
   },
   {
     label: "Api Keys",
-    icon: "",
+    icon: "material-symbols:key",
     basePath: "/keys",
     children: [
       {
+        label: "Api Keys",
+        icon: "material-symbols:list",
+        link: "/keys/list",
+      },
+      {
         label: "Add Api Key",
-        icon: "",
+        icon: "ic:round-plus",
         link: "/keys/add",
       },
     ],
