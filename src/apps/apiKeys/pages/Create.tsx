@@ -78,6 +78,7 @@ export const CreateApiKey = () => {
     const client = getTypeSenseClient(AuthUtils.getAuthDetails());
     const response = await client.keys().create(createParams);
     setApiKey(response.value);
+    setDialogOpen(true);
     setLoading(false);
   };
 
@@ -125,6 +126,7 @@ export const CreateApiKey = () => {
             return (
               <FormControlLabel
                 label={collection}
+                key={collection}
                 control={
                   <Checkbox
                     onChange={(event) => {

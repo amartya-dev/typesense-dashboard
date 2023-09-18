@@ -1,46 +1,42 @@
-# Getting Started with Create React App
+# Typesense Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Works with a self hosted / local TypeSense instance, to get started with typesense visit:
+https://typesense.org/docs/guide/install-typesense.html
 
-## Available Scripts
+Note: You will need the admin key to access this dashboard. Most of the functionalities only work with the admin permissions.
 
-In the project directory, you can run:
+## Available Options
 
-### `yarn start`
+In this dashboard you will have the following sections
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Index ( Collections )
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The menu has been called option, corresponds to collections on typesense, with this board you can:
+- Look at the available collections and their configurations.
+- Bulk clear and delete indexes.
+- Add new index with custom or auto schema.
 
-### `yarn test`
+#### Documents
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+You can select the index and look at the given documents. The dashboard currently tries to set `post_title` as the card title when displaying the document cards.
 
-### `yarn build`
+You can easily search for documents, make sure you select the searchable parameters before searching for documents or the application will break.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Note: The search operation gets auto triggered when you type something in the search text field, with a slight debounce.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Observe
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+TypeSense does not seem to have a lot of analytics options, it only supports storing the queries and their counts in an index, to enable analytics, make sure you follow the instructions at:
+https://typesense.org/docs/0.25.1/api/analytics-query-suggestions.html#enable-the-feature
 
-### `yarn eject`
+After enabling analytics, you can create the corresponding index from +add index option in the dashboard and then add a corresponding analytics rule from this section.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Allows you to add analytics rules.
+- Reports contain the search counts arranged by descending order of counts.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### API Keys
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+The dashboard allows you to delete and add new API keys with the access level you need, chose from:
+- An admin key 
+- A search only key (allows you to select collections in case they are available)
+- Fine Grained key (allowing you to chose from the list of all available actions and collections)

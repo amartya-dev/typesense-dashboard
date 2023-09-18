@@ -20,6 +20,12 @@ export const ApiKeysList = () => {
     setApiKeys(response);
   };
 
+  const deleteApiKey = async (keyId: number) => {
+    const client = getTypeSenseClient(AuthUtils.getAuthDetails());
+    await client.keys(keyId).delete();
+    window.location.reload();
+  };
+
   useEffect(() => {
     getAllApiKeys();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,7 +47,13 @@ export const ApiKeysList = () => {
             <ListItem
               key={apiKey.id}
               secondaryAction={
-                <IconButton edge="end" aria-label="delete">
+                <IconButton
+                  onClick={async () => {
+                    await deleteApiKey(apiKey.id);
+                  }}
+                  edge="end"
+                  aria-label="delete"
+                >
                   <Icon icon="material-symbols:delete-sharp" />
                 </IconButton>
               }

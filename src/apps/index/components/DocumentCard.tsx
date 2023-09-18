@@ -112,7 +112,7 @@ export const DocumentCard = ({ document }: DocumentCartProps) => {
   const [showMore, setShowMore] = useState<boolean>(false);
 
   return (
-    <Card elevation={2} sx={{ width: "70%", borderRadius: 5 }}>
+    <Card elevation={2} sx={{ width: "70%", mt: 2, borderRadius: 5 }}>
       <CardHeader title={documentDetails.post_title} />
       <CardContent>
         {docKeys.slice(0, 10).map((documentKey) => {
@@ -123,7 +123,7 @@ export const DocumentCard = ({ document }: DocumentCartProps) => {
             />
           );
         })}
-        {!showMore && (
+        {!showMore && docKeys.length >= 10 && (
           <Button
             sx={{ textTransform: "none" }}
             onClick={() => {
