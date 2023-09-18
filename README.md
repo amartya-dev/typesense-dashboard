@@ -44,7 +44,7 @@ The dashboard allows you to delete and add new API keys with the access level yo
 
 
 ### Visuals
-![Dashboard Login](screenshots/image.png)
+![Dashboard Login](screenshots/login.png)
 ![Index List](screenshots/indexList.png)
 ![Add Index](screenshots/addIndex.png)
 ![Documents](screenshots/documents.png)
