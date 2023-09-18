@@ -40,3 +40,9 @@ The dashboard allows you to delete and add new API keys with the access level yo
 - An admin key 
 - A search only key (allows you to select collections in case they are available)
 - Fine Grained key (allowing you to chose from the list of all available actions and collections)
+
+
+### TODO
+- Add error handling
+- Option to remember me for persisting login details / API Keys for longer duration.
+- Pagination in documents and queries
