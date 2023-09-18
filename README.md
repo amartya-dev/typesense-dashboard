@@ -40,9 +40,20 @@ The dashboard allows you to delete and add new API keys with the access level yo
 - An admin key 
 - A search only key (allows you to select collections in case they are available)
 - Fine Grained key (allowing you to chose from the list of all available actions and collections)
+- API Keys are only visible once created and aren't stored anywhere.
 
+
+### Visuals
+![Dashboard Login](screenshots/image.png)
+![Index List](screenshots/indexList.png)
+![Add Index](screenshots/addIndex.png)
+![Documents](screenshots/documents.png)
+![Analytics Rules](screenshots/analyticsRules.png)
+![Add Analytics Rule](screenshots/addAnalyticsRules.png)
+![Add API Keys](screenshots/addApiKeys.png)
 
 ### TODO
-- Add error handling
+- Add error handling.
 - Option to remember me for persisting login details / API Keys for longer duration.
-- Pagination in documents and queries
+- Pagination in documents and queries.
+- Configurable card title and image fields.
