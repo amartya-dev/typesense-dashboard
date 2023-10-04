@@ -2,6 +2,7 @@ import {
   FormControl,
   InputLabel,
   MenuItem,
+  Pagination,
   Paper,
   Select,
   Stack,
@@ -24,6 +25,8 @@ export const Reports = () => {
   const [reports, setReports] =
     useState<SearchResponseHit<{ [key: string]: any }>[]>();
   const [collections, setCollections] = useState<string[]>([]);
+  const [numPages, setNumPages] = useState<number>(1);
+  const [selectedPage, setSelectedPage] = useState<number>(1);
   const getReports = async () => {
     const response = await client
       .collections(selectedIndex)
@@ -32,10 +35,12 @@ export const Reports = () => {
         q: ".*",
         query_by: "q",
         sort_by: "count:desc",
+        page: selectedPage,
       });
 
     console.log(response);
     setReports(response.hits);
+    response.hits && setNumPages(response.out_of / response.hits?.length);
   };
   const getAllIndices = async () => {
     const collections = await client.collections().retrieve();
@@ -53,7 +58,7 @@ export const Reports = () => {
       getReports();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedIndex]);
+  }, [selectedIndex, selectedPage]);
 
   return (
     <>
@@ -111,6 +116,18 @@ export const Reports = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {numPages > 1 && (
+        <Pagination
+          color="primary"
+          sx={{ mt: 2 }}
+          count={numPages}
+          page={selectedPage}
+          onChange={(event, value) => {
+            setSelectedPage(value);
+          }}
+        />
+      )}
     </>
   );
 };
