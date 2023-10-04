@@ -16,6 +16,7 @@ import {
   InputBase,
   InputLabel,
   MenuItem,
+  Pagination,
   Paper,
   Select,
   Stack,
@@ -54,6 +55,8 @@ export const DocumentsList = () => {
     useState<SearchResponse<{ [key: string]: any }>>();
   const [selectSearchableVisible, setSelectSearchableVisible] =
     useState<boolean>(false);
+  const [numPages, setNumPages] = useState<number>(1);
+  const [selectedPage, setSelectedPage] = useState<number>(1);
 
   const getRequiredDocuments = async () => {
     const response = await client
@@ -62,8 +65,10 @@ export const DocumentsList = () => {
       .search({
         q: searchQuery !== "" ? searchQuery : "*",
         query_by: queryableParams.join(","),
+        page: selectedPage,
       });
     setDocuments(response.hits || []);
+    response?.hits && setNumPages(response.out_of / response.hits?.length);
     setQueryResponse(response);
   };
 
@@ -87,7 +92,7 @@ export const DocumentsList = () => {
       getRequiredDocuments();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchQuery, selectedCollection]);
+  }, [debouncedSearchQuery, selectedCollection, selectedPage]);
 
   const theme = useTheme();
 
@@ -230,6 +235,18 @@ export const DocumentsList = () => {
       {documents.map((document) => {
         return <DocumentCard key={document.document.id} document={document} />;
       })}
+
+      {numPages > 1 && (
+        <Pagination
+          color="primary"
+          sx={{ mt: 2 }}
+          count={numPages}
+          page={selectedPage}
+          onChange={(event, value) => {
+            setSelectedPage(value);
+          }}
+        />
+      )}
     </>
   );
 };
