@@ -16,9 +16,11 @@ spec:
         app: typesense-dashboard
     spec:
       serviceAccountName: typesense-sa
+      imagePullSecrets:
+      - name: github-registry-secret
       containers:
       - name: typesense-dashboard
-        image: ghcr.io/amartya.g/typesense-dashboard:latest
+        image: ghcr.io/amartya-dev/typesense-dashboard/typesense-dashboard:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -53,11 +55,22 @@ spec:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
           runAsUser: 1005220000
-          runAsGroup: 1001
-          readOnlyRootFilesystem: true
+          runAsGroup: 1005220000
           capabilities:
             drop:
             - ALL
-      securityContext:
-        fsGroup: 1001
+        volumeMounts:
+        - name: nginx-cache
+          mountPath: /var/cache/nginx
+        - name: nginx-tmp
+          mountPath: /tmp/nginx
+        - name: nginx-run
+          mountPath: /run
+      volumes:
+      - name: nginx-cache
+        emptyDir: {}
+      - name: nginx-tmp
+        emptyDir: {}
+      - name: nginx-run
+        emptyDir: {}
       restartPolicy: Always 

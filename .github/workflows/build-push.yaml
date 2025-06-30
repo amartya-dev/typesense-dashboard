@@ -1,4 +1,4 @@
-name: Build and Push Docker image to GHCR
+name: Build, Push and Deploy to OKD
 on:
   release:
     types:
@@ -10,6 +10,8 @@ env:
   REGISTRY: ghcr.io
   IMAGE_VERSION: ${{ github.ref_name }}
   IMAGE_REPO: ${{ github.repository }}
+  NAMESPACE: wordpress-help
+  SERVICE_ACCOUNT: typesense-sa
 
 jobs:
   docker:
@@ -40,3 +42,88 @@ jobs:
             ghcr.io/${{ env.IMAGE_REPO }}/${{ env.IMAGE_NAME }}:latest
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
+
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.event.action == 'published'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install OpenShift CLI
+        uses: redhat-actions/oc-installer@v1
+        with:
+          version: '4.12'
+      
+      - name: Login to OpenShift
+        run: |
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+      
+      - name: Create namespace if not exists
+        run: |
+          oc get namespace ${{ env.NAMESPACE }} || oc apply -f k8s/namespace.yaml
+      
+      - name: Create GitHub Registry Secret
+        run: |
+          oc create secret docker-registry github-registry-secret \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.GITHUB_TOKEN }} \
+            --docker-email=${{ github.actor }}@users.noreply.github.com \
+            -n ${{ env.NAMESPACE }} \
+            --dry-run=client -o yaml | oc apply -f -
+      
+      - name: Update deployment with new image
+        run: |
+          # Update the deployment to use the new image tag
+          oc set image deployment/typesense-dashboard \
+            typesense-dashboard=ghcr.io/${{ env.IMAGE_REPO }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} \
+            -n ${{ env.NAMESPACE }}
+      
+      - name: Apply Kubernetes manifests
+        run: |
+          oc apply -f k8s/ -n ${{ env.NAMESPACE }}
+      
+      - name: Wait for deployment rollout
+        run: |
+          oc rollout status deployment/typesense-dashboard -n ${{ env.NAMESPACE }} --timeout=300s
+      
+      - name: Get deployment status
+        run: |
+          echo "=== Deployment Status ==="
+          oc get pods -n ${{ env.NAMESPACE }} -l app=typesense-dashboard
+          echo ""
+          echo "=== Service Status ==="
+          oc get service typesense-dashboard-service -n ${{ env.NAMESPACE }}
+          echo ""
+          echo "=== Route Status ==="
+          oc get route typesense-dashboard-route -n ${{ env.NAMESPACE }}
+      
+      - name: Health check
+        run: |
+          # Wait a bit for the application to be ready
+          sleep 30
+          
+          # Get the route URL
+          ROUTE_URL=$(oc get route typesense-dashboard-route -n ${{ env.NAMESPACE }} -o jsonpath='{.spec.host}')
+          
+          if [ ! -z "$ROUTE_URL" ]; then
+            echo "Application is available at: https://$ROUTE_URL"
+            
+            # Test health endpoint
+            oc port-forward svc/typesense-dashboard-service 8080:80 -n ${{ env.NAMESPACE }} &
+            PF_PID=$!
+            sleep 10
+            
+            if curl -f http://localhost:8080/health; then
+              echo "✅ Health check passed"
+            else
+              echo "❌ Health check failed"
+              exit 1
+            fi
+            
+            kill $PF_PID
+          else
+            echo "⚠️ Route URL not available"
+          fi
