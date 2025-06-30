@@ -11,21 +11,29 @@ Before deploying, ensure you have the following installed:
 - **Access to OKD cluster**: With appropriate permissions to deploy applications in the `wordpress-help` namespace
 - **Service Account**: The `typesense-sa` service account must exist with appropriate SCC (Security Context Constraints)
 
-## Quick Start
+## Deployment Options
 
-### 1. Build and Deploy (Automated)
+### Option 1: Automated Deployment (Recommended)
 
-The easiest way to deploy is using the provided deployment script:
+The easiest way to deploy is using the automated GitHub Actions workflow:
 
-```bash
-# Make the script executable (if not already done)
-chmod +x deploy.sh
+1. **Set up GitHub Secrets** (see `GITHUB_SECRETS.md`):
+   - `OC_TOKEN`: Your OpenShift authentication token
+   - `OC_SERVER`: Your OpenShift cluster server URL
 
-# Run the deployment script
-./deploy.sh
-```
+2. **Create a GitHub Release**:
+   - Go to your repository → Releases → "Draft a new release"
+   - Set a tag version (e.g., `v1.0.0`)
+   - Publish the release
 
-### 2. Manual Deployment
+3. **Monitor the Workflow**:
+   - The workflow will automatically:
+     - Build and push the Docker image to GHCR
+     - Deploy to OKD using the new image
+     - Run health checks
+     - Report deployment status
+
+### Option 2: Manual Deployment
 
 If you prefer to deploy manually, follow these steps:
 
@@ -107,17 +115,18 @@ The deployment includes:
 - **Route**: External HTTPS access with TLS termination
 - **HPA**: Automatic scaling based on CPU and memory usage
 - **ConfigMap**: Environment configuration
+- **Image Pull Secret**: For accessing GitHub Container Registry
 
 ## Security Features
 
 The deployment includes several security enhancements:
 
-- **Non-root user**: Container runs as user 1001
-- **Read-only filesystem**: Prevents runtime modifications
+- **Non-root user**: Container runs as user 1005220000
 - **Dropped capabilities**: Removes unnecessary Linux capabilities
 - **Security headers**: Added via nginx configuration
 - **TLS termination**: HTTPS with automatic HTTP to HTTPS redirect
 - **Service Account**: Uses `typesense-sa` with appropriate SCC
+- **Volume mounts**: Proper isolation for nginx cache and runtime files
 
 ## Monitoring and Scaling
 
@@ -182,8 +191,11 @@ oc get serviceaccount typesense-sa -n wordpress-help -o yaml
 
 ## Updating the Application
 
-To update the application:
+### Automated Updates (Recommended)
+1. Create a new GitHub release
+2. The workflow will automatically build and deploy the new version
 
+### Manual Updates
 1. Build a new Docker image with a new tag
 2. Update the image reference in `k8s/deployment.yaml`
 3. Apply the updated deployment:
@@ -221,19 +233,20 @@ This project uses GitHub Actions to automatically build and push a Docker image 
 - On every GitHub release (published or edited), the workflow in `.github/workflows/build-push.yaml` will:
   1. Build the Docker image from the repository.
   2. Tag the image as both the release version and `latest`.
-  3. Push the image to `ghcr.io/<your-username-or-org>/<repo-name>:<tag>`.
+  3. Push the image to `ghcr.io/<your-username-or-org>/<repo-name>/<image-name>:<tag>`.
+  4. **On release publication only**: Deploy to OKD automatically.
 
 ### Using the image in Kubernetes/OKD
 - The `k8s/deployment.yaml` is configured to pull the image from GHCR:
   ```yaml
-  image: ghcr.io/amartya.g/typesense-dashboard:latest
+  image: ghcr.io/amartya-dev/typesense-dashboard/typesense-dashboard:latest
   ```
   - You can use a specific release tag instead of `latest` for reproducible deployments.
-- Make sure your OKD/Kubernetes cluster can pull from GHCR. For private repositories, create a Kubernetes secret with your GitHub PAT and reference it in your deployment.
+- The deployment includes an image pull secret for accessing GHCR.
 
 ### Example: Using a specific release tag
 ```yaml
-image: ghcr.io/amartya.g/typesense-dashboard:v1.2.3
+image: ghcr.io/amartya-dev/typesense-dashboard/typesense-dashboard:v1.2.3
 ```
 
-For more details, see the workflow file at `.github/workflows/build-push.yaml`. 
+For more details, see the workflow file at `.github/workflows/build-push.yaml` and `GITHUB_SECRETS.md`. 
