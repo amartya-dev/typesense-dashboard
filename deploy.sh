@@ -9,7 +9,7 @@ set -e
 IMAGE_NAME="typesense-dashboard"
 IMAGE_TAG="latest"
 REGISTRY_URL="your-registry-url.com"  # Replace with your registry URL
-NAMESPACE="typesense-dashboard"
+NAMESPACE="wordpress-help"
 
 # Colors for output
 RED='\033[0;31m'

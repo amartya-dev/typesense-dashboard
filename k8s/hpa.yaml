@@ -2,7 +2,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: typesense-dashboard-hpa
-  namespace: typesense-dashboard
+  namespace: wordpress-help
   labels:
     app: typesense-dashboard
 spec:
