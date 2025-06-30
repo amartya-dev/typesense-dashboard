@@ -1,0 +1,25 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: typesense-dashboard-route
+  namespace: typesense-dashboard
+  labels:
+    app: typesense-dashboard
+  annotations:
+    # Enable TLS termination
+    route.openshift.io/termination: "edge"
+    # Redirect HTTP to HTTPS
+    route.openshift.io/redirect: "true"
+    # Security headers
+    haproxy.router.openshift.io/timeout: "30s"
+spec:
+  host: typesense-dashboard.apps.your-cluster-domain.com  # Replace with your actual domain
+  to:
+    kind: Service
+    name: typesense-dashboard-service
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect 

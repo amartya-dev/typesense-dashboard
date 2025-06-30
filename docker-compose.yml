@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  typesense-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.typesense-dashboard.rule=Host(`localhost`)"
+      - "traefik.http.services.typesense-dashboard.loadbalancer.server.port=8080"
+
+  # Optional: Add Typesense server for local development
+  typesense-server:
+    image: typesense/typesense:0.25.1
+    ports:
+      - "8108:8108"
+    environment:
+      - TYPESENSE_API_KEY=xyz
+      - TYPESENSE_DATA_DIR=/data
+    volumes:
+      - typesense-data:/data
+    restart: unless-stopped
+    profiles:
+      - dev
+
+volumes:
+  typesense-data: 

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: typesense-dashboard-config
+  namespace: typesense-dashboard
+  labels:
+    app: typesense-dashboard
+data:
+  # Add any environment-specific configuration here
+  # For example, default Typesense server URL
+  TYPESENSE_SERVER_URL: "http://typesense-server:8108"
+  APP_NAME: "Typesense Dashboard" 
