@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: typesense-dashboard
+  name: wordpress-help
   labels:
-    name: typesense-dashboard
+    name: wordpress-help
     app: typesense-dashboard 

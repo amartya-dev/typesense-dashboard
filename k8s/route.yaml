@@ -2,7 +2,7 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: typesense-dashboard-route
-  namespace: typesense-dashboard
+  namespace: wordpress-help
   labels:
     app: typesense-dashboard
   annotations:

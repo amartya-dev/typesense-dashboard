@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: typesense-dashboard-service
-  namespace: typesense-dashboard
+  namespace: wordpress-help
   labels:
     app: typesense-dashboard
 spec:

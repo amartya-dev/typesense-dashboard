@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: typesense-dashboard-config
-  namespace: typesense-dashboard
+  namespace: wordpress-help
   labels:
     app: typesense-dashboard
 data:

@@ -8,7 +8,8 @@ Before deploying, ensure you have the following installed:
 
 - **Docker**: For building the container image
 - **OpenShift CLI (oc)**: For deploying to OKD
-- **Access to OKD cluster**: With appropriate permissions to create namespaces and deploy applications
+- **Access to OKD cluster**: With appropriate permissions to deploy applications in the `wordpress-help` namespace
+- **Service Account**: The `typesense-sa` service account must exist with appropriate SCC (Security Context Constraints)
 
 ## Quick Start
 
@@ -45,14 +46,14 @@ docker push your-registry.com/typesense-dashboard:latest
 # Login to your OKD cluster
 oc login --token=your-token --server=your-server
 
-# Create namespace
+# Create namespace (if it doesn't exist)
 oc apply -f k8s/namespace.yaml
 
 # Deploy the application
-oc apply -f k8s/ -n typesense-dashboard
+oc apply -f k8s/ -n wordpress-help
 
 # Check deployment status
-oc rollout status deployment/typesense-dashboard -n typesense-dashboard
+oc rollout status deployment/typesense-dashboard -n wordpress-help
 ```
 
 ## Configuration
@@ -66,7 +67,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: typesense-dashboard-config
-  namespace: typesense-dashboard
+  namespace: wordpress-help
 data:
   TYPESENSE_SERVER_URL: "http://typesense-server:8108"
   APP_NAME: "Typesense Dashboard"
@@ -99,7 +100,8 @@ resources:
 
 The deployment includes:
 
-- **Namespace**: `typesense-dashboard` for resource isolation
+- **Namespace**: `wordpress-help` for resource isolation
+- **Service Account**: `typesense-sa` with appropriate SCC permissions
 - **Deployment**: 2 replicas with health checks and security context
 - **Service**: Internal cluster IP for load balancing
 - **Route**: External HTTPS access with TLS termination
@@ -115,6 +117,7 @@ The deployment includes several security enhancements:
 - **Dropped capabilities**: Removes unnecessary Linux capabilities
 - **Security headers**: Added via nginx configuration
 - **TLS termination**: HTTPS with automatic HTTP to HTTPS redirect
+- **Service Account**: Uses `typesense-sa` with appropriate SCC
 
 ## Monitoring and Scaling
 
@@ -139,16 +142,16 @@ To monitor the application:
 
 ```bash
 # Check pod status
-oc get pods -n typesense-dashboard
+oc get pods -n wordpress-help
 
 # Check deployment status
-oc get deployment typesense-dashboard -n typesense-dashboard
+oc get deployment typesense-dashboard -n wordpress-help
 
 # View logs
-oc logs -f deployment/typesense-dashboard -n typesense-dashboard
+oc logs -f deployment/typesense-dashboard -n wordpress-help
 
 # Check resource usage
-oc top pods -n typesense-dashboard
+oc top pods -n wordpress-help
 ```
 
 ## Troubleshooting
@@ -159,18 +162,22 @@ oc top pods -n typesense-dashboard
 2. **Route not accessible**: Check if the domain is correctly configured
 3. **Health check failures**: Verify the application is responding on port 8080
 4. **Resource constraints**: Adjust resource limits if pods are being evicted
+5. **SCC issues**: Ensure `typesense-sa` has the required Security Context Constraints
 
 ### Debugging Commands
 
 ```bash
 # Describe deployment for detailed status
-oc describe deployment typesense-dashboard -n typesense-dashboard
+oc describe deployment typesense-dashboard -n wordpress-help
 
 # Check events in namespace
-oc get events -n typesense-dashboard --sort-by='.lastTimestamp'
+oc get events -n wordpress-help --sort-by='.lastTimestamp'
 
 # Access application directly (port-forward)
-oc port-forward svc/typesense-dashboard-service 8080:80 -n typesense-dashboard
+oc port-forward svc/typesense-dashboard-service 8080:80 -n wordpress-help
+
+# Check service account permissions
+oc get serviceaccount typesense-sa -n wordpress-help -o yaml
 ```
 
 ## Updating the Application
@@ -182,8 +189,8 @@ To update the application:
 3. Apply the updated deployment:
 
 ```bash
-oc apply -f k8s/deployment.yaml -n typesense-dashboard
-oc rollout status deployment/typesense-dashboard -n typesense-dashboard
+oc apply -f k8s/deployment.yaml -n wordpress-help
+oc rollout status deployment/typesense-dashboard -n wordpress-help
 ```
 
 ## Cleanup
@@ -192,10 +199,9 @@ To remove the deployment:
 
 ```bash
 # Delete all resources
-oc delete -f k8s/ -n typesense-dashboard
+oc delete -f k8s/ -n wordpress-help
 
-# Delete namespace
-oc delete namespace typesense-dashboard
+# Note: The namespace will not be deleted as it may be used by other applications
 ```
 
 ## Support
@@ -205,6 +211,7 @@ For issues or questions:
 2. Review the troubleshooting section
 3. Ensure all prerequisites are met
 4. Verify OKD cluster connectivity and permissions
+5. Confirm `typesense-sa` service account has appropriate SCC
 
 ## CI/CD: Automatic Docker Image Build & Push to GHCR
 

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: typesense-dashboard
-  namespace: typesense-dashboard
+  namespace: wordpress-help
   labels:
     app: typesense-dashboard
 spec:
@@ -15,6 +15,7 @@ spec:
       labels:
         app: typesense-dashboard
     spec:
+      serviceAccountName: typesense-sa
       containers:
       - name: typesense-dashboard
         image: ghcr.io/amartya.g/typesense-dashboard:latest
@@ -51,7 +52,7 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           runAsNonRoot: true
-          runAsUser: 1001
+          runAsUser: 1005220000
           runAsGroup: 1001
           readOnlyRootFilesystem: true
           capabilities:
